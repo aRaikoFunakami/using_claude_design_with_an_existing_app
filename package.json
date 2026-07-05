@@ -10,6 +10,7 @@
     "build:ui": "npm run build -w @ds/ui",
     "dev:admin": "npm run dev -w admin",
     "dev:customer": "npm run dev -w customer",
-    "build": "npm run build:ui && npm run build -w admin && npm run build -w customer"
+    "dev:tracker": "npm run dev -w tracker",
+    "build": "npm run build:ui && npm run build -w admin && npm run build -w customer && npm run build -w tracker"
   }
 }
