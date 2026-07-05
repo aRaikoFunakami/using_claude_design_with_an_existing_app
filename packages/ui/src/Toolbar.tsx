@@ -4,11 +4,9 @@ type ToolbarProps = {
   children: ReactNode;
 };
 
-// Redmine-like filter/action bar: bordered strip above tables.
+// Notion-like filter bar: borderless, airy. (Synced from Claude Design.)
 export function Toolbar({ children }: ToolbarProps) {
   return (
-    <div className="flex flex-wrap items-center gap-2 border border-gray-300 bg-gray-50 px-3 py-2 text-sm">
-      {children}
-    </div>
+    <div className="flex flex-wrap items-center gap-2 py-1 text-sm text-[#9b9a97]">{children}</div>
   );
 }

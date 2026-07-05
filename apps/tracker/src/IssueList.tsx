@@ -5,26 +5,29 @@ import type { Issue } from "./data";
 export function IssueList({ onOpen }: { onOpen: (issue: Issue) => void }) {
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between">
-        <h1 className="text-lg font-bold text-gray-800">Issues</h1>
+      <div className="mb-5 flex items-center justify-between">
+        <h1 className="text-3xl font-medium tracking-tight text-[#37352f]">Issues</h1>
         <Button>+ New issue</Button>
       </div>
 
-      <div className="mb-2">
+      <div className="mb-3">
         <Toolbar>
-          <span className="text-gray-500">Filters:</span>
-          <select className="border border-gray-300 bg-white px-1 py-0.5">
+          <span>Filters:</span>
+          <select className="rounded-md bg-[#f1f1ef] px-2.5 py-1 text-[#37352f]">
             <option>Status: open</option>
             <option>Status: all</option>
           </select>
-          <select className="border border-gray-300 bg-white px-1 py-0.5">
+          <select className="rounded-md bg-[#f1f1ef] px-2.5 py-1 text-[#37352f]">
             <option>Assignee: any</option>
           </select>
-          <select className="border border-gray-300 bg-white px-1 py-0.5">
+          <select className="rounded-md bg-[#f1f1ef] px-2.5 py-1 text-[#37352f]">
             <option>Priority: any</option>
           </select>
-          <input className="border border-gray-300 px-1 py-0.5" placeholder="Search subject…" />
-          <button className="ml-auto text-blue-700 hover:underline">Apply</button>
+          <input
+            className="rounded-md bg-[#f1f1ef] px-2.5 py-1 text-[#37352f] placeholder:text-[#9b9a97]"
+            placeholder="Search subject…"
+          />
+          <button className="ml-auto text-[#787774] hover:text-[#37352f]">Apply</button>
         </Toolbar>
       </div>
 
@@ -44,7 +47,7 @@ export function IssueList({ onOpen }: { onOpen: (issue: Issue) => void }) {
           {issues.map((it) => (
             <TR key={it.id} onClick={() => onOpen(it)}>
               <TD>
-                <span className="text-blue-700">#{it.id}</span>
+                <span className="text-[#787774]">#{it.id}</span>
               </TD>
               <TD>
                 <Tag color={trackerColor[it.tracker]}>{it.tracker}</Tag>
@@ -54,23 +57,23 @@ export function IssueList({ onOpen }: { onOpen: (issue: Issue) => void }) {
               </TD>
               <TD>{it.priority}</TD>
               <TD>
-                <span className="text-gray-800">{it.subject}</span>
+                <span className="text-[#37352f]">{it.subject}</span>
               </TD>
               <TD>
-                <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-2">
                   <Avatar name={it.assignee} />
-                  <span className="text-gray-700">{it.assignee}</span>
+                  <span className="text-[#37352f]">{it.assignee}</span>
                 </span>
               </TD>
               <TD>
-                <span className="whitespace-nowrap text-gray-500">{it.updated}</span>
+                <span className="whitespace-nowrap text-[#9b9a97]">{it.updated}</span>
               </TD>
             </TR>
           ))}
         </TBody>
       </Table>
 
-      <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
+      <div className="mt-4 flex items-center gap-3 text-sm text-[#9b9a97]">
         <span>({issues.length} issues)</span>
         <span className="ml-auto">« 1 2 3 »</span>
       </div>

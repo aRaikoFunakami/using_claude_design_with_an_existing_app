@@ -1,16 +1,15 @@
 import type { ReactNode } from "react";
 
-// Redmine-like dense, fully-bordered data table primitives.
-// Styling lives here so a redesign (borders, density, radius) propagates to every table.
+// Notion-like data table primitives: borderless, subtle row separators, airy padding.
+// (Synced from Claude Design: was a fully-bordered dense Redmine table.)
+// Styling lives here so a redesign propagates to every table.
 
 export function Table({ children }: { children: ReactNode }) {
-  return (
-    <table className="w-full border-collapse border border-gray-300 text-sm">{children}</table>
-  );
+  return <table className="w-full border-collapse text-sm">{children}</table>;
 }
 
 export function THead({ children }: { children: ReactNode }) {
-  return <thead className="bg-gray-100 text-gray-600">{children}</thead>;
+  return <thead className="text-[#9b9a97]">{children}</thead>;
 }
 
 export function TBody({ children }: { children: ReactNode }) {
@@ -19,10 +18,7 @@ export function TBody({ children }: { children: ReactNode }) {
 
 export function TR({ children, onClick }: { children: ReactNode; onClick?: () => void }) {
   return (
-    <tr
-      onClick={onClick}
-      className={`border-b border-gray-200 ${onClick ? "cursor-pointer hover:bg-blue-50" : ""}`}
-    >
+    <tr onClick={onClick} className={onClick ? "cursor-pointer hover:bg-[#f7f7f5]" : ""}>
       {children}
     </tr>
   );
@@ -30,12 +26,12 @@ export function TR({ children, onClick }: { children: ReactNode; onClick?: () =>
 
 export function TH({ children }: { children: ReactNode }) {
   return (
-    <th className="border border-gray-300 px-2 py-1.5 text-left font-semibold whitespace-nowrap">
+    <th className="border-b border-[#ebebea] px-3 py-2 text-left text-xs font-medium whitespace-nowrap">
       {children}
     </th>
   );
 }
 
 export function TD({ children }: { children: ReactNode }) {
-  return <td className="border border-gray-200 px-2 py-1.5 align-middle">{children}</td>;
+  return <td className="border-b border-[#ebebea] px-3 py-3.5 align-middle">{children}</td>;
 }

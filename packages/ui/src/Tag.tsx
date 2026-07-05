@@ -7,17 +7,17 @@ type TagProps = {
   children: ReactNode;
 };
 
-// Redmine-like tracker tag: small dot + label.
+// Tracker tag: small dot + label. Softened, muted dot colors (Notion palette).
 const dot: Record<TagColor, string> = {
-  red: "bg-red-500",
-  green: "bg-green-500",
-  blue: "bg-blue-500",
-  gray: "bg-gray-400",
+  red: "bg-[#e07b6a]",
+  green: "bg-[#6aad7a]",
+  blue: "bg-[#6a9bd0]",
+  gray: "bg-[#9b9a97]",
 };
 
 export function Tag({ color = "gray", children }: TagProps) {
   return (
-    <span className="inline-flex items-center gap-1 text-xs text-gray-700">
+    <span className="inline-flex items-center gap-1.5 text-xs text-[#37352f]">
       <span className={`h-2 w-2 rounded-full ${dot[color]}`} />
       {children}
     </span>
