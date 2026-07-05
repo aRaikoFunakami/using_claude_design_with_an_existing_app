@@ -10,10 +10,11 @@
 flowchart LR
     A[既存 React アプリ] --> B[DS ライブラリ化<br/>packages/ui]
     B --> C[Design Sync<br/>.dc.html を Claude Design へ]
-    C --> D[Claude Design 上で<br/>デザイン変更]
+    C --> X[実ブラウザに接続<br/>Playwright MCP Extension]
+    X --> D[Claude Design のチャットで<br/>デザイン変更]
     D --> E[変更をコードへ反映<br/>Button.tsx]
     E --> F[ビルド & 動作確認]
-    F -.再び.-> C
+    F -.再び.-> D
 ```
 
 ポイントは **Claude Design が受け取るのは生の `.tsx` ではない**ということです。Design Sync は React コンポーネントを Claude Design 独自の `.dc.html`（Design Components 形式）に変換してアップロードします。ここを理解していないと最初の一歩で詰まります。
@@ -144,48 +145,89 @@ React コンポーネントの Tailwind クラスを、この `.dc.html` の `<h
 
 Card は customer アプリと同一の見た目、Dialog はネイティブ `<dialog>` をディム背景付きモーダルとして再現できています。
 
-### ハマりどころ：ツール群が2系統ある
+### ハマりどころ 1：ツール群が2系統ある
 
 Claude Design には `finalize_plan` / `write_files` を持つツールが **2系統**あります。片方の `finalize_plan` が返したトークンを、もう片方の `create_support_js` に渡すと `plan_token is malformed` で弾かれます。**同一系統に統一する**のが正解です（`create_support_js` と `render_preview` を持つ系統に揃える）。
 
-## ステップ3：Claude Design で UI を変更する
+### ハマりどころ 2：`@dsCard` があってもカードが出ない（要 `register_assets`）
 
-同期できたら、Claude Design 側でデザインを変えます。今回は **プライマリボタンの色を 青 (#2563eb) → テラコッタ (#D97757)** に変更しました。
+同期後に Claude Design の Design System ペインを開くと、「**No cards yet — add `<!-- @dsCard group="…" -->` as the first line of any .html file**」と出て、カードが1枚も表示されないことがあります。各 `.dc.html` の1行目に `@dsCard` を書いていても、です。
 
-`.dc.html` の `.btn-primary { background: ... }` を書き換えて `write_files` → `render_preview` で確認します。
+![No cards yet](images/claude-design-no-cards.png)
 
-| 変更前（青） | 変更後（テラコッタ） |
-|---|---|
-| ![変更前](images/button-ds-before-blue.png) | ![変更後](images/button-ds-after-terracotta.png) |
+原因は、カード索引ファイル `_ds_manifest.json` が生成されていないこと。この manifest は Claude Design の self-check（サーバサイドレンダリング）が自動生成しますが、**ヘッドレスで `write_files` アップロードしただけの経路では self-check が走らず、manifest が作られません**（ブラウザの console に `GetFile 404` が並ぶのが目印）。解決策はカードを明示登録する `register_assets` を呼ぶこと。
 
-実際に Claude Design を使う場合は、この編集を Web エディタ上でマウスやプロンプトで行い、右上の「Share」から**コードへの同期用プロンプト**を取得します。
-
-## ステップ4：変更をコードに反映する
-
-Claude Design 側の変更（`#2563eb → #D97757`）を、React コードに戻します。反映先は `packages/ui/src/Button.tsx` の `primary` バリアント1箇所だけです。`Button` は customer / admin 両アプリの単一ソースなので、ここを直せば両方に伝播します。
-
-```diff
-- primary: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500",
-+ // Brand color synced from Claude Design: terracotta #D97757
-+ primary: "bg-[#D97757] text-white hover:bg-[#C15F3D] focus:ring-[#D97757]",
+```
+register_assets(projectId, planId, assets=[
+  { name: "Button", path: "Button.dc.html", group: "Components", viewport: {width:480,height:320} },
+  { name: "Card",   path: "Card.dc.html",   group: "Components", viewport: {width:480,height:320} },
+  { name: "Dialog", path: "Dialog.dc.html", group: "Components", viewport: {width:520,height:360} },
+])
 ```
 
-テラコッタは Tailwind の標準カラーに無いので、arbitrary value（`bg-[#D97757]`）で指定します。
+これで Design System ペインにカードが並びます。
 
-> **注意**：デザイン→コードの方向は、コード→デザイン（`write_files` 一発）ほど自動化されていません。Claude Design の「Share」からプロンプトをコピーして Claude Code に貼り付け、初回はセッション再起動 + MCP 認証が必要になる、という手順が案内されることがあります。往復のうち「戻す」側のほうが手間がかかる、と認識しておくとよいです。
+> **重要な学び：この「No cards」は、`render_preview` が返すプレビュー URL を headless で見ているだけでは絶対に気づけません。** それは各ファイルのレンダリング結果しか映さず、エディタ UI の状態を持たないからです。Claude Design のエディタ（＝あなたのログイン済みブラウザ）を実際に見て初めて分かるエラーでした。そこで次のステップで、その実ブラウザに接続します。
 
-## ステップ5：新しいコードで動作チェック
+## ステップ3：実ブラウザに接続する（Playwright MCP Browser Extension）
 
-`npm run build -w customer` でビルドし、ブラウザで確認します。
+Claude Design のエディタ操作には claude.ai のログインセッションが要ります。AI エージェント（Claude Code）が新規に起動するヘッドレスブラウザは未ログインなので、エディタ UI を触れません。そこで **Playwright MCP の Browser Extension** を使い、普段使っている Chrome（ログイン済みセッション・Cookie・開いているタブ）にそのまま接続します。
 
-![customer アプリ（テラコッタ）](images/customer-app-terracotta.png)
+設定は Playwright MCP サーバの起動引数に `--extension` を足すだけ：
 
-customer アプリの「Get started」ボタンがテラコッタになりました。**Claude Design で加えた変更が、React コードを経由して実アプリに反映された**ことが確認できます。往復の成立です。
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest", "--extension"]
+    }
+  }
+}
+```
+
+手順は (1) Chrome/Edge に「Playwright Extension」をインストール、(2) 上記設定で MCP を再起動、(3) 拡張アイコンから接続を許可、の3つ。接続できたかは、エージェント側で「タブ一覧」を取ると分かります——自分の実タブ（開いている Claude Design のタブなど）が見えれば OK、`about:blank` 1件だけなら未接続です。以降、AI は**あなたが今開いている Claude Design のタブを直接操作・確認**できます。
+
+## ステップ4：Claude Design 上で UI を変更する（ブラウザのチャットで指示）
+
+実ブラウザで Claude Design のプロジェクトを開き、左下のチャット欄（「Describe what you want to create...」）に自然言語で指示します。今回はボタンを**ピル型（角丸最大）**にしてみます。
+
+> Make the buttons pill-shaped with fully rounded corners. Keep the terracotta primary color and the gray secondary style. Only change the corner radius.
+
+数秒で Claude Design のエージェントが `.dc.html` を編集し、「Pill corners applied (`border-radius: 999px`); ... Done. Edited Button.dc.html」と返します。プレビューのボタンがその場でピル型に変わります。
+
+![Claude Design エディタ（チャットでピル型に変更）](images/claude-design-editor-pill.png)
+
+ここがコード→デザインの `write_files` と決定的に違う点です：**変更を Web エディタ上で目視しながら、自然言語で回せる。** 実際に Claude Design が編集した `.dc.html` を読み返すと、変更は外科的で `.btn { border-radius: 8px → 999px }` の1行だけ。指示外の箇所は一切触っていませんでした。
+
+## ステップ5：変更をコードに反映する
+
+Claude Design 側の変更（`border-radius: 999px` ＝ ピル）を React コードに戻します。`packages/ui/src/Button.tsx` の base クラスを `rounded-lg` → `rounded-full` にするだけ。`Button` は customer / admin 両アプリの単一ソースなので、この1箇所で両方に反映されます。
+
+```diff
+- "inline-flex items-center justify-center rounded-lg px-4 py-2 ...";
++ // Pill corners synced from Claude Design (border-radius: 999px → rounded-full)
++ "inline-flex items-center justify-center rounded-full px-4 py-2 ...";
+```
+
+（同じ要領で、ブランドカラーを 青 → テラコッタ に変えたときは `primary` バリアントを `bg-[#D97757]` にしました。色も角丸も、Tailwind クラス1つの差し替えで反映できます。テラコッタは Tailwind 標準色に無いので arbitrary value で指定。）
+
+> **注意**：デザイン→コードの反映は半自動です。Claude Design 右上の「Share」からコードへの同期用プロンプトを取得して Claude Code に貼る運用もありますが、いずれにせよ「デザイン側の変更を読み取ってコードに落とす」ステップは人／エージェントが担います。
+
+## ステップ6：新しいコードで動作チェック
+
+`npm run build -w customer` でビルドし、接続済みの実ブラウザでローカルプレビューを開いて確認します。
+
+![customer アプリ（テラコッタのピル型）](images/customer-app-pill.png)
+
+「Get started」ボタンがテラコッタのピル型になりました。**ブラウザ上の Claude Design で加えた変更が、React コードを経由して実アプリに反映された**ことが確認できます。往復の成立です。
 
 ## ハマりどころ・注意点まとめ
 
 - **Claude Design が扱うのは `.tsx` ではなく `.dc.html`。** Tailwind クラスを `<helmet><style>` に移植する変換が入る。これが Design Sync の実体。
 - **`finalize_plan` → `create_support_js` → `write_files` → `render_preview` の順序**を守る。トークンは同一ツール系統で統一する。
+- **`@dsCard` があってもカードが出ないことがある。** headless アップロード経路では `_ds_manifest.json` が生成されず、`register_assets` での明示登録が必要。
+- **検証は実ブラウザで。** `render_preview` の headless プレビューだけ見ていると、エディタ UI 側のエラー（No cards 等）を見逃す。Playwright MCP Browser Extension でログイン済みブラウザに接続して確認する。
 - **Tailwind v4 のモノレポは `@source` が必須。** ライブラリのクラスがアプリの CSS に出力されない。
 - **手書き Vite アプリは `vite-env.d.ts` を忘れずに。** CSS の side-effect import が TS2882 で落ちる。
 - **デザイン→コードの反映は半手動。** コード→デザインほど1コマンドでは終わらない。
