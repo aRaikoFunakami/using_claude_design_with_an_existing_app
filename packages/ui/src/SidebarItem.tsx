@@ -5,18 +5,19 @@ type SidebarItemProps = {
   onClick?: () => void;
 };
 
-// Redmine-like sidebar nav item: dense, left-aligned, subtle active state.
+// Notion-like sidebar nav item: no accent bar, rounded, soft gray hover/active.
+// (Synced from Claude Design: was a left-accent-bar Redmine item.)
 export function SidebarItem({ label, icon, active = false, onClick }: SidebarItemProps) {
   return (
     <button
       onClick={onClick}
-      className={`flex w-full items-center gap-2 border-l-2 px-3 py-1.5 text-left text-sm ${
+      className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm ${
         active
-          ? "border-blue-600 bg-blue-50 font-medium text-blue-800"
-          : "border-transparent text-gray-700 hover:bg-gray-100"
+          ? "bg-[#efefee] font-medium text-[#37352f]"
+          : "text-[#5f5e5b] hover:bg-[#efefee]"
       }`}
     >
-      {icon && <span className="w-4 text-gray-400">{icon}</span>}
+      {icon && <span className="w-4 text-center text-[#9b9a97]">{icon}</span>}
       {label}
     </button>
   );

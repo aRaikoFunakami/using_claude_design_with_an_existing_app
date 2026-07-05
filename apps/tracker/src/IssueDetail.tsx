@@ -5,17 +5,17 @@ import type { Issue } from "./data";
 export function IssueDetail({ issue, onBack }: { issue: Issue; onBack: () => void }) {
   return (
     <div>
-      <div className="mb-2 text-sm text-gray-500">
-        <button onClick={onBack} className="text-blue-700 hover:underline">
+      <div className="mb-3 text-sm text-[#9b9a97]">
+        <button onClick={onBack} className="text-[#787774] hover:text-[#37352f]">
           Issues
         </button>
         <span className="mx-1">»</span>
         <span>#{issue.id}</span>
       </div>
 
-      <div className="mb-3 flex items-center gap-2">
+      <div className="mb-6 flex items-center gap-2">
         <Tag color={trackerColor[issue.tracker]}>{issue.tracker}</Tag>
-        <h1 className="text-lg font-bold text-gray-800">
+        <h1 className="text-2xl font-medium tracking-tight text-[#37352f]">
           #{issue.id} {issue.subject}
         </h1>
         <div className="ml-auto flex gap-2">
@@ -24,28 +24,28 @@ export function IssueDetail({ issue, onBack }: { issue: Issue; onBack: () => voi
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div className="col-span-2 space-y-4">
-          <section className="border border-gray-300 bg-white">
-            <div className="border-b border-gray-300 bg-gray-100 px-3 py-1.5 text-sm font-semibold text-gray-600">
+      <div className="grid grid-cols-3 gap-8">
+        <div className="col-span-2 space-y-6">
+          <section>
+            <div className="mb-1.5 text-xs font-medium uppercase tracking-wide text-[#9b9a97]">
               Description
             </div>
-            <p className="px-3 py-2 text-sm text-gray-800">{issue.description}</p>
+            <p className="text-sm text-[#37352f]">{issue.description}</p>
           </section>
 
-          <section className="border border-gray-300 bg-white">
-            <div className="border-b border-gray-300 bg-gray-100 px-3 py-1.5 text-sm font-semibold text-gray-600">
+          <section>
+            <div className="mb-1.5 text-xs font-medium uppercase tracking-wide text-[#9b9a97]">
               History
             </div>
-            <ul className="divide-y divide-gray-200">
+            <ul className="space-y-3">
               {issue.comments.map((c, i) => (
-                <li key={i} className="flex gap-2 px-3 py-2 text-sm">
+                <li key={i} className="flex gap-2.5 text-sm">
                   <Avatar name={c.author} />
                   <div>
-                    <div className="text-gray-500">
-                      <span className="font-medium text-gray-700">{c.author}</span> · {c.when}
+                    <div className="text-[#9b9a97]">
+                      <span className="font-medium text-[#37352f]">{c.author}</span> · {c.when}
                     </div>
-                    <div className="text-gray-800">{c.body}</div>
+                    <div className="text-[#37352f]">{c.body}</div>
                   </div>
                 </li>
               ))}

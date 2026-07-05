@@ -8,23 +8,23 @@ export default function App() {
   const [selected, setSelected] = useState<Issue | null>(null);
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+    <div className="flex min-h-screen bg-white text-[#37352f]">
       <Sidebar active="issues" />
       <div className="flex-1">
-        <header className="flex items-center gap-3 border-b border-gray-300 bg-white px-4 py-2">
-          <span className="font-bold text-gray-800">Acme Tracker</span>
-          <nav className="flex gap-3 text-sm text-gray-600">
-            <span className="border-b-2 border-blue-600 pb-1 font-medium text-blue-800">Issues</span>
+        <header className="flex items-center gap-4 bg-white px-7 py-3">
+          <span className="font-semibold text-[#37352f]">Acme Tracker</span>
+          <nav className="flex gap-4 text-sm text-[#787774]">
+            <span className="pb-1 font-medium text-[#37352f] shadow-[inset_0_-2px_0_#37352f]">Issues</span>
             <span>Activity</span>
             <span>Roadmap</span>
             <span>Repository</span>
           </nav>
           <input
-            className="ml-auto border border-gray-300 px-2 py-0.5 text-sm"
+            className="ml-auto rounded-md bg-[#f1f1ef] px-3 py-1.5 text-sm text-[#37352f] placeholder:text-[#9b9a97]"
             placeholder="Search…"
           />
         </header>
-        <main className="p-4">
+        <main className="px-12 py-6">
           {selected ? (
             <IssueDetail issue={selected} onBack={() => setSelected(null)} />
           ) : (

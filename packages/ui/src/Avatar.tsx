@@ -2,8 +2,8 @@ type AvatarProps = {
   name: string;
 };
 
-// Initials avatar. Deterministic color from the name.
-const palette = ["bg-blue-600", "bg-green-600", "bg-orange-600", "bg-purple-600", "bg-red-600", "bg-teal-600"];
+// Initials avatar. Deterministic color from the name. Softened, muted palette (Notion).
+const palette = ["bg-[#6a9bd0]", "bg-[#6aad7a]", "bg-[#d99b6a]", "bg-[#a58ac0]", "bg-[#c98a8a]", "bg-[#6ab0a8]"];
 
 function initials(name: string) {
   return name
