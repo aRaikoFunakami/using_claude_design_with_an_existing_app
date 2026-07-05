@@ -1,0 +1,15 @@
+{
+  "name": "using-claude-design-monorepo",
+  "private": true,
+  "version": "0.0.0",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build:ui": "npm run build -w @ds/ui",
+    "dev:admin": "npm run dev -w admin",
+    "dev:customer": "npm run dev -w customer",
+    "build": "npm run build:ui && npm run build -w admin && npm run build -w customer"
+  }
+}
