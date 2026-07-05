@@ -8,7 +8,8 @@ export function Button({ variant = "primary", className = "", ...props }: Button
   const base =
     "inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50";
   const variants = {
-    primary: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500",
+    // Brand color synced from Claude Design: terracotta #D97757 (was blue-600)
+    primary: "bg-[#D97757] text-white hover:bg-[#C15F3D] focus:ring-[#D97757]",
     secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-400",
   };
   return <button className={`${base} ${variants[variant]} ${className}`} {...props} />;
